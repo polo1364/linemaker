@@ -701,8 +701,18 @@
           </div>
 
           <div class="form-group">
-            <label>✍️ 字體</label>
+            <label>✈️ 字體</label>
             <select id="fontSelect"></select>
+          </div>
+
+          <div class="form-group">
+            <label>🎯 網格配置</label>
+            <select id="gridConfig">
+              <option value="3x3">3x3 (9張貼圖)</option>
+              <option value="4x4" selected>4x4 (16張貼圖)</option>
+              <option value="5x5">5x5 (25張貼圖)</option>
+              <option value="6x6">6x6 (36張貼圖)</option>
+            </select>
           </div>
 
           <div class="form-group">
@@ -731,7 +741,7 @@
 
         <!-- Stickers Grid -->
         <div class="card" id="stickersCard" style="display: none;">
-          <div class="card-title">✅ 處理完成<span class="badge">12張</span></div>
+          <div class="card-title">✅ 處理完成<span class="badge" id="stickerCount">16張</span></div>
           <div class="card-desc">點擊任意貼圖即可單獨下載，或使用下方按鈕批量下載</div>
           <div class="sticker-grid" id="stickerGrid"></div>
           <button class="btn-primary" onclick="downloadAllAsZip()">
@@ -913,7 +923,7 @@
       "塗鴉字 (街頭風格)": "Graffiti font, street art style, urban culture, spray paint effect, hip-hop typography"
     };
 
-    const STICKER_CONFIG = {
+    let STICKER_CONFIG = {
       COLS: 4,
       ROWS: 3,
       CELL_WIDTH: 688,
@@ -965,6 +975,14 @@
         document.getElementById('borderValue').textContent = e.target.value;
       });
 
+      // Grid config change
+      document.getElementById('gridConfig').addEventListener('change', (e) => {
+        const value = e.target.value;
+        const [cols, rows] = value.split('x').map(Number);
+        STICKER_CONFIG.COLS = cols;
+        STICKER_CONFIG.ROWS = rows;
+      });
+
       // Drag and drop
       const uploadArea = document.getElementById('uploadArea');
       uploadArea.addEventListener('dragover', (e) => {
@@ -1008,6 +1026,8 @@
       };
       reader.readAsDataURL(file);
     }
+
+
 
     function showApiKeyModal() {
       document.getElementById('apiKeyModal').classList.add('show');
@@ -1059,8 +1079,9 @@
         const randomSeed = Math.floor(Math.random() * 1000000);
         const timestamp = Date.now();
         
+        const totalStickers = STICKER_CONFIG.COLS * STICKER_CONFIG.ROWS;
         const promptText = `
-Create a sprite sheet of 12 Line stickers (4 columns x 3 rows).
+Create a sprite sheet of ${totalStickers} Line stickers (${STICKER_CONFIG.COLS} columns x ${STICKER_CONFIG.ROWS} rows).
 
 [Generation ID: ${randomSeed}-${timestamp}] - This ensures unique output each time.
 
@@ -1075,14 +1096,14 @@ Requirements:
    - Color: Use vibrant, lively colors (e.g., bright orange, hot pink, cyan, red, purple). **ABSOLUTELY NO GREEN** or colors close to RGB(0, 255, 0) for text, as it will be removed by the green screen filter.
    - Effects: **MUST add a 2-3px thick WHITE OUTLINE (stroke)** around all text to ensure readability on any background.
    - Size: Large, legible, and integrated into the sticker design.
-5. Layout: Strictly arrange in a grid of 4 columns and 3 rows. The total image aspect ratio is 16:9.
+5. Layout: Strictly arrange in a grid of ${STICKER_CONFIG.COLS} columns and ${STICKER_CONFIG.ROWS} rows.
 6. Background: Use a **pure green screen background (RGB 0, 255, 0)** for the entire canvas. This green will be removed later.
 7. Style: "${styleDescription}"
-8. Output: A single image containing all 12 stickers in a 4x3 grid layout.
+8. Output: A single image containing all ${totalStickers} stickers in a ${STICKER_CONFIG.COLS}x${STICKER_CONFIG.ROWS} grid layout.
 
 IMPORTANT:
 - Each sticker should have UNIQUE and DISTINCT poses, expressions, and text.
-- Vary the composition, angles, and emotions across all 12 stickers.
+- Vary the composition, angles, and emotions across all ${totalStickers} stickers.
 - Text must be in Traditional Chinese with white outlines.
 - Background MUST be pure green (RGB 0, 255, 0).
 - NO green colors in the character or text.
@@ -1109,7 +1130,6 @@ IMPORTANT:
             generationConfig: {
               responseModalities: ["TEXT", "IMAGE"],
               imageConfig: {
-                aspectRatio: "16:9",
                 imageSize: "2K"
               },
               temperature: 1.0,
@@ -1162,7 +1182,7 @@ IMPORTANT:
 
         updateProgress(100);
         hideProgress();
-        alert('✅ 貼圖生成成功！');
+        alert(`✅ 貼圖生成成功！共${totalStickers}張`);
       } catch (error) {
         console.error('Generation Error:', error);
         alert('❌ 生成失敗：' + error.message);
@@ -1204,7 +1224,8 @@ IMPORTANT:
         hideProgress();
 
         document.getElementById('stickersCard').style.display = 'block';
-        alert('✅ 處理完成！共12張貼圖');
+        const totalStickers = STICKER_CONFIG.COLS * STICKER_CONFIG.ROWS;
+        alert(`✅ 處理完成！共${totalStickers}張貼圖`);
       } catch (error) {
         console.error('Processing Error:', error);
         alert('❌ 處理失敗：' + error.message);
@@ -1313,6 +1334,12 @@ IMPORTANT:
     function displayStickers() {
       const grid = document.getElementById('stickerGrid');
       grid.innerHTML = '';
+      
+      // Update badge count
+      document.getElementById('stickerCount').textContent = `${stickers.length}張`;
+      
+      // Update grid columns based on config
+      grid.style.gridTemplateColumns = `repeat(${STICKER_CONFIG.COLS}, 1fr)`;
 
       stickers.forEach((sticker, index) => {
         const div = document.createElement('div');
@@ -1359,7 +1386,7 @@ IMPORTANT:
         document.body.removeChild(link);
         URL.revokeObjectURL(link.href);
 
-        alert('✅ 下載成功！共12張貼圖');
+        alert(`✅ 下載成功！共${stickers.length}張貼圖`);
       } catch (error) {
         alert('❌ 下載失敗：' + error.message);
         console.error(error);
