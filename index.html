@@ -711,7 +711,6 @@
               <option value="3x3">3x3 (9張貼圖)</option>
               <option value="4x4" selected>4x4 (16張貼圖)</option>
               <option value="5x5">5x5 (25張貼圖)</option>
-              <option value="6x6">6x6 (36張貼圖)</option>
             </select>
           </div>
 
@@ -778,156 +777,255 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script>
-    // Constants
-    const THEME_PROMPTS = {
-      // 日常生活類
-      "社畜日常 (預設)": "Corporate Slave (社畜) daily office life (e.g., tired, fake smile, drinking coffee, typing furiously, salary day, overtime, I want to go home).",
-      "日常生活": "Daily Life (日常生活), casual interactions, greetings (Hello, Good night, OK, Thanks), sleeping, eating, playing phone, daily struggles.",
-      "喜怒哀樂": "Emotional Expressions (喜怒哀樂), exaggerated facial expressions, happy, angry, sad, joyful, crying, laughing out loud, shocked, rolling eyes.",
-      "耍廢人生": "Lazy Life (耍廢人生), lying in bed, potato couch, refusing to work, sleepy, messy hair, eating snacks, doing nothing, don't bother me.",
-      "宅在家裡": "Stay at Home (宅在家), gaming all day, watching series, ordering delivery, pajamas all day, messy room, comfort zone, introvert life.",
-      "通勤地獄": "Commute Hell (通勤地獄), crowded train, traffic jam, running late, sleepy morning, packed subway, road rage, finally home.",
-      
-      // 情感關係類
-      "情侶放閃": "Couples in Love (情侶放閃), romantic gestures, hugging, kissing, missing you, heart eyes, sweet moments, dating, love you.",
-      "單身狗日常": "Single Life (單身狗), forever alone, eating alone, third wheel, watching couples, self love, independent, freedom.",
-      "好友互嗆": "Roasting Friends (好友互嗆), sarcastic jokes, teasing, playful insults, best friend banter, inside jokes, savage comebacks.",
-      "家庭溫馨": "Family Warmth (家庭溫馨), family dinner, parents nagging, sibling fights, grandparents love, home sweet home, family reunion.",
-      
-      // 興趣愛好類
-      "美食吃貨": "Foodie Life (美食吃貨), drooling, eating huge meals, drinking boba tea, hungry, satisfied, food coma, midnight snack, yummy.",
-      "運動健身": "Workout & Fitness (運動健身), gym, running, yoga, sweating, muscles, tired after workout, protein shake, motivation, weight loss.",
-      "貓奴日常": "Cat Lover (貓奴日常), playing with cats, feeding, cleaning litter, being ignored by cat, cat ears, cute paws, meow.",
-      "狗派生活": "Dog Lover (狗派生活), walking dog, playing fetch, happy tail wagging, puppy eyes, loyal companion, messy room, woof.",
-      "遊戲玩家": "Gamer Life (遊戲玩家), playing games, rage quit, victory, defeat, grinding, loot box, GG, one more game.",
-      "追劇狂魔": "Binge Watching (追劇狂魔), Netflix marathon, one more episode, spoiler alert, plot twist, crying over drama, can't stop watching.",
-      "購物狂": "Shopaholic (購物狂), online shopping, delivery arrived, broke but happy, shopping spree, credit card maxed, retail therapy.",
-      
-      // 學習工作類
-      "校園生活": "School Life (校園生活), studying, exams, recess, homework, graduation, crush on classmate, teacher scolding, reading books.",
-      "考試地獄": "Exam Hell (考試地獄), cramming, all-nighter, brain dead, test anxiety, blank mind, finally done, results day.",
-      "新手爸媽": "New Parents (新手爸媽), feeding baby, changing diapers, tired eyes, baby crying, happy family, holding baby, milk bottle.",
-      "創業打拼": "Startup Hustle (創業打拼), working late, pitching ideas, funding secured, pivot, burnout, success celebration, never give up.",
-      
-      // 旅遊休閒類
-      "日本旅遊": "Japan Travel (日本旅遊), sightseeing, eating ramen, hot springs, kimono, taking photos, shopping, excited tourist vibes, flight, luggage.",
-      "歐洲之旅": "Europe Travel (歐洲之旅), Eiffel Tower, museums, wine tasting, backpacking, getting lost, beautiful scenery, culture shock.",
-      "海島度假": "Beach Vacation (海島度假), sunbathing, swimming, cocktails, sunset, relaxing, snorkeling, paradise vibes, tan lines.",
-      "露營野餐": "Camping & Picnic (露營野餐), tent setup, campfire, stargazing, hiking, nature, BBQ, outdoor adventure, bugs everywhere.",
-      
-      // 節慶特殊類
-      "節日慶祝": "Festival Celebration (節日慶祝), Birthday, New Year, Christmas, red envelopes, party poppers, cake, fireworks, congratulations.",
-      "萬聖節": "Halloween (萬聖節), trick or treat, costumes, pumpkins, spooky, candy, haunted house, scary faces, ghost vibes.",
-      "情人節": "Valentine's Day (情人節), roses, chocolates, romantic dinner, love letters, heart shapes, couple goals, forever together.",
-      "農曆新年": "Lunar New Year (農曆新年), red envelopes, family reunion, dumplings, firecrackers, zodiac animals, prosperity, good fortune.",
-      
-      // 網路文化類
-      "網路用語": "Internet Slang (網路用語), LOL, OMG, facepalm, trending memes, keyboard warrior, like & subscribe, +1.",
-      "迷因梗圖": "Trending Memes (迷因梗圖), funny poses, viral internet culture references, sarcastic humor, troll face vibes, funny faces.",
-      "直播主": "Streamer Life (直播主), going live, chat interaction, donations, subscribers, technical issues, viral moment, streaming setup.",
-      "社群媒體": "Social Media (社群媒體), selfie, posting, likes, followers, influencer, hashtags, viral content, scrolling endlessly.",
-      
-      // 情緒心理類
-      "正能量語錄": "Positive Vibes (正能量語錄), fighting!, you can do it, good morning, thumbs up, sunshine, motivation, cheer up.",
-      "負能量釋放": "Negative Energy (負能量釋放), depression, dark cloud, soul leaving body, giving up, I want to go home, social battery dead.",
-      "焦慮人生": "Anxiety Life (焦慮人生), overthinking, panic, stress, worried, nervous breakdown, existential crisis, need therapy.",
-      "佛系人生": "Zen Life (佛系人生), whatever, don't care, go with flow, inner peace, meditation, letting go, everything is fine."
-    };
+    // Constants (擴充版本：60+主題、60+風格、40+字體，帶分類標籤)
+// 擴充的主題、風格、字體配置（約2倍數量，帶分類）
 
-    const STYLE_PROMPTS = {
-      // 基礎風格
-      "原版風格": "Keep the original style of the input image, consistent character design.",
-      
-      // 寫實系列
-      "寫實光影": "Photorealistic, hyperrealistic, cinematic lighting, highly detailed textures, natural colors, ray tracing, global illumination, depth of field, sharp focus, 8k resolution, photographic quality, realistic shadows.",
-      "電影質感": "Cinematic photography, movie poster style, dramatic lighting, film grain, anamorphic lens flare, color grading, Hollywood production quality, epic composition.",
-      "油畫質感": "Oil painting style, thick brush strokes, impasto technique, rich colors, textured canvas, classical art, Renaissance painting, museum quality.",
-      
-      // 亞洲漫畫系列
-      "日式漫畫": "Japanese anime style, light novel illustration, mobile game CG, official art, high quality, vibrant colors, cel shading, high-gloss finish, glowing effects, bloom, rim lighting, pastel blue and white color palette.",
-      "少女漫畫": "Shoujo manga style, sparkles and flowers, big expressive eyes, soft pastel colors, romantic atmosphere, delicate linework, dreamy backgrounds.",
-      "少年漫畫": "Shounen manga style, dynamic action poses, speed lines, bold inking, energetic composition, intense expressions, power-up effects.",
-      "韓式漫畫": "Korean webtoon, manhwa style, high quality, high detail, smooth coloring, clean lineart, volumetric lighting, pastel colors, glowing skin, subtle shading.",
-      "中式水墨畫": "Traditional Chinese ink painting, guohua style, ink wash painting, expressive brush strokes, flowing ink, calligraphy strokes, watercolor blend, monochrome palette with muted earthy tones, rice paper texture, negative space, atmospheric.",
-      
-      // 西方漫畫系列
-      "美式漫畫": "American comic book style, graphic novel art, bold outlines, heavy inking, cross-hatching shadows, high contrast, vibrant and saturated colors, halftone dots texture, dynamic composition, retro comic feel, muscular anatomy.",
-      "歐洲漫畫": "European comic style, ligne claire, Tintin style, clean lines, flat colors, detailed backgrounds, Franco-Belgian comics, artistic storytelling.",
-      
-      // 可愛系列
-      "可愛Q版漫畫": "Chibi style, super deformed (SD), cute, kawaii, simplified anatomy, large heads small bodies, clean thick lines, soft coloring, pastel color palette, cheerful atmosphere, expressive faces, sticker art style.",
-      "三麗鷗風格": "Sanrio style, Hello Kitty aesthetic, extremely cute, pastel rainbow colors, kawaii culture, simple shapes, adorable characters, merchandise design.",
-      "軟萌風格": "Soft and fluffy style, marshmallow aesthetic, gentle gradients, rounded shapes, baby colors, cozy atmosphere, plushie texture.",
-      
-      // 動畫風格
-      "迪士尼風格動畫": "Disney animation style, Pixar style, stylized 3D render, highly polished, expressive character design, appealing soft shapes, vibrant and warm color palette, soft global illumination, subsurface scattering, fairytale atmosphere, cinematic feel.",
-      "吉卜力風格": "Studio Ghibli style, Hayao Miyazaki aesthetic, hand-drawn animation, watercolor backgrounds, nostalgic atmosphere, whimsical characters, nature elements.",
-      "夢工廠風格": "DreamWorks animation style, expressive faces, dynamic poses, vibrant colors, comedic timing, modern 3D animation, appealing character design.",
-      
-      // 復古系列
-      "像素風格": "Pixel art, 8-bit style, 16-bit retro game, low resolution, dot art, visible grid, limited color palette, distinct pixels, dithering shading, nostalgic aesthetic, sprite art.",
-      "復古卡通": "Vintage cartoon style, 1930s rubber hose animation, black and white, grainy film, old Disney style, bouncy movement, classic animation.",
-      "80年代風格": "1980s retro style, neon colors, synthwave aesthetic, geometric shapes, bold outlines, vibrant gradients, arcade game vibes.",
-      "90年代風格": "1990s anime style, retro anime aesthetic, VHS quality, nostalgic colors, classic cel animation, hand-drawn charm.",
-      
-      // 現代數位系列
-      "3D渲染風格": "3D render, CGI illustration, highly detailed models, realistic textures, physically based rendering (PBR), octane render style, complex lighting, volumetric fog, sharp focus, digital sculpting, clean render pass.",
-      "扁平化設計": "Flat design, minimal style, solid colors, no gradients, geometric shapes, modern UI aesthetic, clean and simple, vector art.",
-      "Material Design": "Google Material Design style, depth and shadow, bold colors, grid-based layouts, responsive animation, modern digital aesthetic.",
-      "賽博龐克": "Cyberpunk style, neon lights, futuristic cityscape, high tech low life, holographic effects, dark atmosphere, sci-fi elements.",
-      
-      // 藝術風格
-      "波普藝術": "Pop Art style, Andy Warhol inspired, bold colors, Ben-Day dots, comic book aesthetic, mass culture references, screen printing effect.",
-      "抽象藝術": "Abstract art style, geometric shapes, bold colors, non-representational, modern art, expressive composition, artistic interpretation.",
-      "塗鴉藝術": "Graffiti art style, street art, spray paint effect, urban culture, bold letters, vibrant colors, hip-hop aesthetic.",
-      "剪紙藝術": "Paper cut art style, layered paper, shadow box effect, handcrafted look, silhouette design, folk art inspiration."
-    };
+const THEME_PROMPTS = {
+  // === 日常生活類 ===
+  "【日常】社畜日常": "Corporate office worker daily life: exhausted, fake smile, drinking coffee, typing frantically, payday excitement, overtime struggles, wanting to go home",
+  "【日常】日常生活": "Everyday casual life: greetings (hello, good night, OK, thanks), sleeping, eating, using phone, daily routines",
+  "【日常】喜怒哀樂": "Basic emotions: happy, angry, sad, joyful, crying, laughing, shocked, eye-rolling, various facial expressions",
+  "【日常】耍廢人生": "Lazy lifestyle: lying in bed, couch potato, refusing work, sleepy, messy hair, snacking, doing nothing",
+  "【日常】宅在家": "Staying home: gaming, binge-watching, ordering food, wearing pajamas all day, messy room, comfort zone",
+  "【日常】通勤地獄": "Commute struggles: crowded train, traffic jam, running late, sleepy morning, packed subway, road rage",
+  "【日常】早起困難": "Morning struggles: alarm clock, snooze button, zombie mode, need coffee, breakfast rush, late panic",
+  "【日常】睡前時光": "Bedtime routine: scrolling phone, can't sleep, counting sheep, sweet dreams, goodnight messages",
+  
+  // === 情感關係類 ===
+  "【情感】情侶放閃": "Romantic couple: hugging, kissing, missing you, heart eyes, sweet moments, dating, love expressions",
+  "【情感】單身狗": "Single life: forever alone, eating solo, third wheel, watching couples, self-love, independence",
+  "【情感】好友互嗆": "Friend banter: sarcastic jokes, teasing, playful insults, savage comebacks, inside jokes",
+  "【情感】家庭溫馨": "Family warmth: family dinner, parents nagging, sibling fights, grandparents' love, family reunion",
+  "【情感】暗戀心情": "Secret crush: blushing, nervous, shy glances, heart pounding, daydreaming, confessing feelings",
+  "【情感】分手療傷": "Breakup healing: crying, ice cream therapy, moving on, heartbroken, new beginning, self-care",
+  "【情感】閨蜜時光": "Besties time: girl talk, shopping together, secrets sharing, supporting each other, squad goals",
+  "【情感】兄弟情誼": "Brotherhood: bro fist, gaming together, having each other's back, loyalty, friendship goals",
+  
+  // === 興趣愛好類 ===
+  "【興趣】美食吃貨": "Foodie life: drooling, eating big meals, bubble tea, hungry, satisfied, food coma, midnight snack",
+  "【興趣】運動健身": "Fitness: gym workout, running, yoga, sweating, muscle soreness, protein shake, motivation",
+  "【興趣】貓奴日常": "Cat lover: playing with cats, feeding, litter cleaning, being ignored, cat ears, paws, meow",
+  "【興趣】狗派生活": "Dog lover: walking dog, playing fetch, tail wagging, puppy eyes, loyal companion, woof",
+  "【興趣】遊戲玩家": "Gamer: playing games, rage quit, victory, defeat, grinding, loot, GG, one more game",
+  "【興趣】追劇狂魔": "Binge watching: Netflix marathon, one more episode, spoiler alert, plot twist, can't stop",
+  "【興趣】購物狂": "Shopaholic: online shopping, delivery, broke but happy, shopping spree, retail therapy",
+  "【興趣】閱讀書蟲": "Bookworm: reading novels, library time, book recommendations, plot discussions, page turner",
+  "【興趣】音樂迷": "Music lover: headphones on, concert vibes, singing along, playlist mood, rhythm feeling",
+  "【興趣】攝影愛好": "Photography: taking photos, perfect angle, editing pics, camera gear, capturing moments",
+  "【興趣】手作DIY": "Crafting: handmade items, creative projects, DIY fun, artistic expression, making things",
+  "【興趣】園藝種植": "Gardening: planting seeds, watering plants, green thumb, harvest joy, nature connection",
+  
+  // === 學習工作類 ===
+  "【工作】校園生活": "School life: studying, exams, recess, homework, graduation, classroom, teacher, books",
+  "【工作】考試地獄": "Exam hell: cramming, all-nighter, brain fog, test anxiety, blank mind, results day",
+  "【工作】新手爸媽": "New parents: feeding baby, diaper changes, tired eyes, baby crying, family joy, parenting",
+  "【工作】創業打拼": "Startup hustle: working late, pitching ideas, funding, pivot, burnout, success celebration",
+  "【工作】遠距工作": "Remote work: home office, video calls, pajama meetings, work-life balance, digital nomad",
+  "【工作】職場菜鳥": "Workplace newbie: first day, learning ropes, asking questions, making mistakes, growing",
+  "【工作】升職加薪": "Career advancement: promotion, raise, achievement, recognition, career goals, success",
+  "【工作】會議地獄": "Meeting overload: endless meetings, boring presentations, mute button, multitasking, finally done",
+  
+  // === 旅遊休閒類 ===
+  "【旅遊】日本旅遊": "Japan travel: sightseeing, ramen, hot springs, kimono, photos, shopping, tourist excitement",
+  "【旅遊】歐洲之旅": "Europe travel: Eiffel Tower, museums, wine, backpacking, getting lost, beautiful scenery",
+  "【旅遊】海島度假": "Beach vacation: sunbathing, swimming, cocktails, sunset, relaxing, snorkeling, paradise",
+  "【旅遊】露營野餐": "Camping: tent setup, campfire, stargazing, hiking, nature, BBQ, outdoor adventure",
+  "【旅遊】城市探索": "City exploration: landmarks, street food, local culture, getting around, urban adventures",
+  "【旅遊】山林健行": "Mountain hiking: trekking, summit views, fresh air, challenging trails, nature beauty",
+  "【旅遊】美食之旅": "Food tour: trying local dishes, street food, restaurants, culinary adventures, taste exploration",
+  "【旅遊】溫泉之旅": "Hot spring trip: relaxing bath, healing waters, spa time, rejuvenation, peaceful moments",
+  
+  // === 節慶特殊類 ===
+  "【節慶】節日慶祝": "Festival celebration: birthday, New Year, Christmas, red envelopes, party, cake, fireworks",
+  "【節慶】萬聖節": "Halloween: trick or treat, costumes, pumpkins, spooky, candy, haunted house, ghosts",
+  "【節慶】情人節": "Valentine's Day: roses, chocolates, romantic dinner, love letters, hearts, couple goals",
+  "【節慶】農曆新年": "Lunar New Year: red envelopes, family reunion, dumplings, firecrackers, zodiac, prosperity",
+  "【節慶】中秋節": "Mid-Autumn Festival: mooncakes, full moon, lanterns, family gathering, moon gazing",
+  "【節慶】端午節": "Dragon Boat Festival: rice dumplings, dragon boats, traditional customs, festive atmosphere",
+  "【節慶】母親節": "Mother's Day: mom appreciation, flowers, gratitude, family love, special celebration",
+  "【節慶】畢業季": "Graduation season: cap toss, diploma, farewell, new beginning, achievement, memories",
+  
+  // === 網路文化類 ===
+  "【網路】網路用語": "Internet slang: LOL, OMG, facepalm, trending memes, keyboard warrior, like & subscribe",
+  "【網路】迷因梗圖": "Meme culture: funny poses, viral references, sarcastic humor, troll vibes, internet jokes",
+  "【網路】直播主": "Streamer life: going live, chat interaction, donations, subscribers, viral moments",
+  "【網路】社群媒體": "Social media: selfie, posting, likes, followers, influencer, hashtags, viral content",
+  "【網路】線上遊戲": "Online gaming: multiplayer, team play, voice chat, ranking up, gaming community",
+  "【網路】網購達人": "Online shopping pro: comparing prices, reading reviews, cart filling, package tracking",
+  "【網路】數位生活": "Digital lifestyle: apps, notifications, screen time, tech savvy, connected world",
+  "【網路】表情包": "Emoji culture: expressive faces, reaction images, chat stickers, digital communication",
+  
+  // === 情緒心理類 ===
+  "【情緒】正能量": "Positive vibes: fighting spirit, you can do it, good morning, thumbs up, motivation, cheer up",
+  "【情緒】負能量": "Negative energy: depression, dark cloud, soul leaving, giving up, exhausted, drained",
+  "【情緒】焦慮人生": "Anxiety: overthinking, panic, stress, worried, nervous breakdown, need therapy",
+  "【情緒】佛系人生": "Zen life: whatever, don't care, go with flow, inner peace, meditation, letting go",
+  "【情緒】社恐日常": "Social anxiety: avoiding people, awkward moments, introvert struggles, comfort zone",
+  "【情緒】拖延症": "Procrastination: deadline panic, last minute rush, I'll do it later, time management fails",
+  "【情緒】完美主義": "Perfectionism: attention to detail, high standards, never satisfied, striving for excellence",
+  "【情緒】療癒時光": "Healing moments: self-care, relaxation, peaceful vibes, comfort, soothing activities",
+  
+  // === 職業專業類 ===
+  "【職業】醫護人員": "Healthcare workers: doctor, nurse, caring for patients, medical procedures, saving lives",
+  "【職業】老師教育": "Teachers: teaching, grading, classroom management, student interaction, education passion",
+  "【職業】設計師": "Designers: creative work, brainstorming, design tools, client feedback, artistic vision",
+  "【職業】工程師": "Engineers: coding, debugging, problem solving, technical work, innovation",
+  "【職業】服務業": "Service industry: customer service, hospitality, dealing with customers, service with smile",
+  "【職業】藝術家": "Artists: creating art, inspiration, exhibitions, artistic expression, creative process",
+  
+  // === 季節天氣類 ===
+  "【季節】春天賞花": "Spring: cherry blossoms, flowers blooming, fresh start, pleasant weather, outdoor activities",
+  "【季節】夏日炎炎": "Summer: hot weather, beach time, ice cream, air conditioning, summer vacation",
+  "【季節】秋天楓葉": "Autumn: falling leaves, cozy sweaters, harvest season, comfortable temperature, warm colors",
+  "【季節】冬日雪景": "Winter: snow, cold weather, hot drinks, cozy indoors, winter activities, staying warm",
+  "【季節】下雨天": "Rainy days: umbrella, staying dry, cozy indoors, rain sounds, puddle jumping",
+  "【季節】颱風天": "Typhoon day: strong winds, heavy rain, staying safe indoors, storm warnings, weather alert"
+};
 
-    const FONT_STYLES = {
-      // 基礎字體
-      "黑體 (預設)": "Bold Sans-serif, Heiti style, modern, clean, high legibility, standard sticker font",
-      "圓體 (可愛柔和)": "Rounded Sans-serif, YuanTi style, soft edges, cute, friendly, kawaii typography",
-      "明體 (優雅端莊)": "Serif font, Mincho style, elegant, traditional, formal, classic typography, readable",
-      
-      // 手寫系列
-      "手寫體 (隨性塗鴉)": "Handwritten style, marker pen, casual, personal, messy but cute, notebook doodle style",
-      "鋼筆字 (流暢優美)": "Fountain pen calligraphy, flowing strokes, elegant handwriting, cursive style, sophisticated",
-      "粉筆字 (黑板風格)": "Chalk font, blackboard style, rough texture, educational vibe, handwritten chalk letters",
-      "蠟筆字 (童趣天真)": "Crayon font, child-like writing, colorful strokes, playful, kindergarten aesthetic",
-      
-      // 藝術字體
-      "書法體 (氣勢磅礴)": "Chinese Calligraphy, brush strokes, energetic, traditional ink style, powerful lines",
-      "行書 (流暢瀟灑)": "Running script, semi-cursive, flowing characters, artistic calligraphy, dynamic strokes",
-      "篆書 (古典莊重)": "Seal script, ancient Chinese characters, decorative, traditional, historical style",
-      
-      // 現代設計
-      "POP體 (活潑海報)": "POP art style, bold bubble letters, heavy outlines, advertisement style, vivid and bouncy",
-      "綜藝體 (誇張醒目)": "Variety show subtitle style, extra bold, exaggerated strokes, attention-grabbing, TV show font",
-      "霓虹字 (發光效果)": "Neon sign font, glowing effect, retro futuristic, bright colors, nightlife aesthetic",
-      "立體字 (3D效果)": "3D font, extruded letters, shadow and depth, dimensional typography, bold presence",
-      
-      // 可愛系列
-      "娃娃體 (童趣可愛)": "Childish font, crayon style, playful, naive, irregular sizes, kindergarten style",
-      "泡泡字 (圓潤Q彈)": "Bubble font, rounded bubbly letters, soft and bouncy, cute and friendly, cartoon style",
-      "棉花糖體 (軟萌甜美)": "Marshmallow font, super soft and fluffy, pastel aesthetic, sweet and gentle, kawaii culture",
-      
-      // 復古系列
-      "像素體 (復古遊戲)": "Pixel font, 8-bit, retro gaming style, blocky, jagged edges, digital look",
-      "打字機 (復古機械)": "Typewriter font, monospaced, vintage mechanical, retro office, classic typing style",
-      "報紙體 (新聞標題)": "Newspaper headline font, bold serif, press style, editorial typography, classic news",
-      
-      // 特殊風格
-      "漫畫字 (動感活潑)": "Comic book font, action words, sound effects style, dynamic, energetic, POW BAM style",
-      "恐怖字 (驚悚詭異)": "Horror font, dripping letters, creepy style, Halloween vibe, scary typography",
-      "科技字 (未來感)": "Tech font, futuristic, digital display, sci-fi style, modern technology, sleek design",
-      "塗鴉字 (街頭風格)": "Graffiti font, street art style, urban culture, spray paint effect, hip-hop typography"
-    };
+const STYLE_PROMPTS = {
+  // === 亞洲風格 ===
+  "【亞洲】日式動漫": "Japanese anime style, light novel illustration, vibrant colors, cel shading, high-gloss, glowing effects, bloom, rim lighting",
+  "【亞洲】少女漫畫": "Shoujo manga: sparkles, flowers, big expressive eyes, soft pastels, romantic atmosphere, delicate linework",
+  "【亞洲】少年漫畫": "Shounen manga: dynamic action, speed lines, bold inking, energetic composition, intense expressions",
+  "【亞洲】韓式漫畫": "Korean webtoon, manhwa: high quality, smooth coloring, clean lineart, volumetric lighting, pastel colors",
+  "【亞洲】中式水墨": "Chinese ink painting: brush strokes, ink wash, flowing ink, calligraphy, watercolor, rice paper texture",
+  "【亞洲】中式國風": "Chinese traditional style: classical aesthetics, elegant patterns, cultural elements, heritage design",
+  "【亞洲】日式浮世繪": "Ukiyo-e style: woodblock print aesthetic, bold outlines, flat colors, traditional Japanese art",
+  "【亞洲】泰式藝術": "Thai art style: intricate patterns, gold details, temple aesthetics, Southeast Asian culture",
+  
+  // === 西方風格 ===
+  "【西方】美式漫畫": "American comic: bold outlines, heavy inking, cross-hatching, high contrast, vibrant colors, halftone dots",
+  "【西方】歐洲漫畫": "European comic: ligne claire, Tintin style, clean lines, flat colors, detailed backgrounds",
+  "【西方】迪士尼": "Disney animation: Pixar style, stylized 3D, polished, expressive characters, soft shapes, warm colors",
+  "【西方】吉卜力": "Studio Ghibli: hand-drawn animation, watercolor backgrounds, nostalgic, whimsical, nature elements",
+  "【西方】夢工廠": "DreamWorks animation: expressive faces, dynamic poses, vibrant colors, modern 3D, comedic",
+  "【西方】卡通網絡": "Cartoon Network style: bold shapes, exaggerated features, quirky characters, fun aesthetics",
+  
+  // === 寫實風格 ===
+  "【寫實】照片寫實": "Photorealistic: hyperrealistic, cinematic lighting, detailed textures, natural colors, 8k quality",
+  "【寫實】電影質感": "Cinematic: movie poster style, dramatic lighting, film grain, lens flare, color grading",
+  "【寫實】油畫質感": "Oil painting: thick brush strokes, impasto, rich colors, textured canvas, classical art",
+  "【寫實】水彩畫": "Watercolor: soft washes, transparent layers, flowing colors, paper texture, artistic fluidity",
+  "【寫實】素描鉛筆": "Pencil sketch: graphite drawing, shading, hatching, realistic proportions, detailed linework",
+  "【寫實】炭筆畫": "Charcoal drawing: bold strokes, dramatic contrast, smudged shading, expressive marks",
+  
+  // === 可愛風格 ===
+  "【可愛】Q版萌系": "Chibi style: super deformed, large heads, small bodies, thick lines, soft colors, kawaii",
+  "【可愛】三麗鷗": "Sanrio style: Hello Kitty aesthetic, extremely cute, pastel rainbow, simple shapes, adorable",
+  "【可愛】軟萌風": "Soft fluffy: marshmallow aesthetic, gentle gradients, rounded shapes, baby colors, cozy",
+  "【可愛】卡哇伊": "Kawaii culture: Japanese cute, pastel colors, sparkles, hearts, adorable expressions",
+  "【可愛】布偶玩具": "Plushie style: soft toy aesthetic, stitching details, cuddly appearance, fabric texture",
+  "【可愛】糖果色": "Candy colors: sweet pastels, sugary aesthetic, bright cheerful, dessert inspired",
+  
+  // === 復古風格 ===
+  "【復古】像素藝術": "Pixel art: 8-bit, 16-bit retro game, low resolution, dot art, visible grid, dithering",
+  "【復古】80年代": "1980s retro: neon colors, synthwave, geometric shapes, bold outlines, arcade vibes",
+  "【復古】90年代": "1990s anime: retro aesthetic, VHS quality, nostalgic colors, classic cel animation",
+  "【復古】復古卡通": "Vintage cartoon: 1930s rubber hose, black and white, grainy film, classic animation",
+  "【復古】蒸氣龐克": "Steampunk: Victorian era, brass gears, mechanical, industrial, vintage futuristic",
+  "【復古】老電影": "Old film: sepia tone, film grain, vintage cinematography, classic movie aesthetic",
+  
+  // === 現代數位 ===
+  "【現代】3D渲染": "3D render: CGI, detailed models, realistic textures, PBR, octane render, volumetric lighting",
+  "【現代】扁平化": "Flat design: minimal, solid colors, no gradients, geometric shapes, modern UI, vector art",
+  "【現代】Material Design": "Google Material: depth and shadow, bold colors, grid layouts, responsive, modern digital",
+  "【現代】賽博龐克": "Cyberpunk: neon lights, futuristic cityscape, high tech low life, holographic, sci-fi",
+  "【現代】未來科技": "Futuristic tech: sleek design, holographic interfaces, advanced technology, sci-fi elements",
+  "【現代】極簡主義": "Minimalism: simple clean, negative space, essential elements only, modern aesthetics",
+  "【現代】霓虹燈光": "Neon glow: glowing lights, vibrant neon, dark background, nightlife aesthetic, luminous",
+  
+  // === 藝術流派 ===
+  "【藝術】波普藝術": "Pop Art: Andy Warhol inspired, bold colors, Ben-Day dots, comic aesthetic, mass culture",
+  "【藝術】抽象藝術": "Abstract art: geometric shapes, bold colors, non-representational, modern art, expressive",
+  "【藝術】塗鴉藝術": "Graffiti: street art, spray paint, urban culture, bold letters, vibrant, hip-hop",
+  "【藝術】剪紙藝術": "Paper cut: layered paper, shadow box, silhouette design, folk art, handcrafted",
+  "【藝術】印象派": "Impressionism: visible brush strokes, light emphasis, ordinary subject matter, movement",
+  "【藝術】超現實": "Surrealism: dreamlike, bizarre imagery, unexpected juxtapositions, subconscious exploration",
+  "【藝術】表現主義": "Expressionism: emotional intensity, distorted forms, vivid colors, subjective perspective",
+  
+  // === 特殊材質 ===
+  "【材質】毛氈布藝": "Felt fabric: soft textile, handmade craft, stitching, cozy material, warm texture",
+  "【材質】黏土陶藝": "Clay sculpture: handmade pottery, ceramic texture, sculpted forms, artisan craft",
+  "【材質】玻璃工藝": "Glass art: transparent, reflective, colorful glass, light refraction, delicate",
+  "【材質】金屬質感": "Metallic: shiny metal, reflective surface, industrial, chrome, steel texture",
+  "【材質】木質紋理": "Wood texture: natural grain, warm tones, organic material, rustic, handcrafted",
+  "【材質】紙張拼貼": "Paper collage: cut and paste, layered paper, mixed media, textured composition",
+  
+  // === 特殊效果 ===
+  "【效果】發光效果": "Glowing: luminous, light emission, radiant, bright aura, magical glow",
+  "【效果】水晶透明": "Crystal clear: transparent, glass-like, refractive, sparkling, pristine",
+  "【效果】毛絨質感": "Fluffy fur: soft texture, fuzzy, plush, cozy, warm and cuddly",
+  "【效果】液體流動": "Liquid flow: fluid dynamics, flowing water, melting, dripping, dynamic movement",
+  "【效果】煙霧迷幻": "Smoke and mist: ethereal, foggy, mysterious atmosphere, soft diffusion",
+  "【效果】火焰燃燒": "Fire and flames: burning, heat, dynamic energy, warm glow, intense"
+};
+
+const FONT_STYLES = {
+  // === 基礎字體 ===
+  "【基礎】黑體": "Bold Sans-serif, Heiti, modern, clean, high legibility, standard font",
+  "【基礎】圓體": "Rounded Sans-serif, YuanTi, soft edges, cute, friendly, kawaii typography",
+  "【基礎】明體": "Serif font, Mincho, elegant, traditional, formal, classic, readable",
+  "【基礎】楷體": "Kai font, regular script, balanced, standard Chinese calligraphy style",
+  
+  // === 手寫系列 ===
+  "【手寫】手寫體": "Handwritten, marker pen, casual, personal, messy but cute, notebook doodle",
+  "【手寫】鋼筆字": "Fountain pen calligraphy, flowing strokes, elegant handwriting, cursive, sophisticated",
+  "【手寫】粉筆字": "Chalk font, blackboard style, rough texture, educational vibe, handwritten chalk",
+  "【手寫】蠟筆字": "Crayon font, child-like writing, colorful strokes, playful, kindergarten aesthetic",
+  "【手寫】簽名字": "Signature style, personal autograph, flowing script, unique character, artistic",
+  "【手寫】塗鴉字": "Doodle font, casual sketching, playful marks, informal, creative scribbles",
+  
+  // === 書法藝術 ===
+  "【書法】書法體": "Chinese Calligraphy, brush strokes, energetic, traditional ink, powerful lines",
+  "【書法】行書": "Running script, semi-cursive, flowing characters, artistic calligraphy, dynamic",
+  "【書法】篆書": "Seal script, ancient Chinese characters, decorative, traditional, historical",
+  "【書法】草書": "Cursive script, highly stylized, flowing, artistic, expressive brush work",
+  "【書法】隸書": "Clerical script, flat and wide, ancient style, formal, historical Chinese",
+  
+  // === 現代設計 ===
+  "【現代】POP體": "POP art style, bold bubble letters, heavy outlines, advertisement, vivid and bouncy",
+  "【現代】綜藝體": "Variety show subtitle, extra bold, exaggerated strokes, attention-grabbing, TV font",
+  "【現代】霓虹字": "Neon sign font, glowing effect, retro futuristic, bright colors, nightlife aesthetic",
+  "【現代】立體字": "3D font, extruded letters, shadow and depth, dimensional typography, bold presence",
+  "【現代】科技字": "Tech font, futuristic, digital display, sci-fi style, modern technology, sleek",
+  "【現代】幾何字": "Geometric font, angular shapes, modern design, structured, architectural",
+  
+  // === 可愛系列 ===
+  "【可愛】娃娃體": "Childish font, crayon style, playful, naive, irregular sizes, kindergarten",
+  "【可愛】泡泡字": "Bubble font, rounded bubbly letters, soft and bouncy, cute and friendly, cartoon",
+  "【可愛】棉花糖體": "Marshmallow font, super soft and fluffy, pastel aesthetic, sweet and gentle, kawaii",
+  "【可愛】卡通字": "Cartoon font, playful, exaggerated, fun, animated style, child-friendly",
+  "【可愛】貓咪字": "Cat-themed font, paw prints, whiskers, cute animal elements, playful",
+  
+  // === 復古系列 ===
+  "【復古】像素體": "Pixel font, 8-bit, retro gaming style, blocky, jagged edges, digital look",
+  "【復古】打字機": "Typewriter font, monospaced, vintage mechanical, retro office, classic typing",
+  "【復古】報紙體": "Newspaper headline font, bold serif, press style, editorial typography, classic news",
+  "【復古】老電影": "Vintage cinema font, classic movie titles, retro Hollywood, film credits",
+  "【復古】西部牛仔": "Western font, wild west style, rustic, saloon aesthetic, frontier typography",
+  
+  // === 特殊風格 ===
+  "【特殊】漫畫字": "Comic book font, action words, sound effects, dynamic, energetic, POW BAM style",
+  "【特殊】恐怖字": "Horror font, dripping letters, creepy style, Halloween vibe, scary typography",
+  "【特殊】塗鴉字": "Graffiti font, street art style, urban culture, spray paint effect, hip-hop",
+  "【特殊】哥德字": "Gothic font, medieval style, ornate, blackletter, dramatic, historical",
+  "【特殊】武俠字": "Martial arts font, Chinese sword fighting aesthetic, heroic, traditional",
+  "【特殊】魔法字": "Magical font, mystical, fantasy style, enchanted, spellbook aesthetic",
+  
+  // === 裝飾效果 ===
+  "【裝飾】描邊字": "Outlined font, thick stroke borders, high contrast, clear definition, bold presence",
+  "【裝飾】陰影字": "Shadow font, drop shadow effect, depth, dimensional, layered appearance",
+  "【裝飾】漸層字": "Gradient font, color transition, rainbow effect, vibrant, eye-catching",
+  "【裝飾】發光字": "Glowing font, luminous effect, neon glow, radiant, bright aura",
+  "【裝飾】金屬字": "Metallic font, chrome effect, shiny, reflective, luxurious appearance",
+  "【裝飾】火焰字": "Flame font, burning effect, fiery, dynamic, intense energy"
+};
 
     let STICKER_CONFIG = {
       COLS: 4,
-      ROWS: 3,
-      CELL_WIDTH: 688,
-      CELL_HEIGHT: 512
+      ROWS: 4,
+      CELL_WIDTH: 370,
+      CELL_HEIGHT: 320
     };
 
     // State
@@ -1080,34 +1178,46 @@
         const timestamp = Date.now();
         
         const totalStickers = STICKER_CONFIG.COLS * STICKER_CONFIG.ROWS;
+        
+        const targetWidth = STICKER_CONFIG.CELL_WIDTH * STICKER_CONFIG.COLS;
+        const targetHeight = STICKER_CONFIG.CELL_HEIGHT * STICKER_CONFIG.ROWS;
+        
         const promptText = `
-Create a sprite sheet of ${totalStickers} Line stickers (${STICKER_CONFIG.COLS} columns x ${STICKER_CONFIG.ROWS} rows).
+You MUST create EXACTLY a ${STICKER_CONFIG.COLS} × ${STICKER_CONFIG.ROWS} grid (${totalStickers} total stickers).
 
-[Generation ID: ${randomSeed}-${timestamp}] - This ensures unique output each time.
+Image Dimensions: EXACTLY ${targetWidth}px width × ${targetHeight}px height.
 
-Requirements:
-1. Character: Based on the input image provided.
+[Generation ID: ${randomSeed}-${timestamp}]
+
+⚠️ CRITICAL GRID REQUIREMENTS (DO NOT DEVIATE):
+- Grid Layout: EXACTLY ${STICKER_CONFIG.COLS} columns × ${STICKER_CONFIG.ROWS} rows = ${totalStickers} stickers
+- Cell Size: Each cell is EXACTLY ${STICKER_CONFIG.CELL_WIDTH}px × ${STICKER_CONFIG.CELL_HEIGHT}px
+- Grid Precision: Perfect alignment with NO gaps, NO overlaps, NO extra spacing
+- Cell Boundaries: Each sticker must fit EXACTLY within its cell boundaries
+- Mathematical Check: Total width = ${STICKER_CONFIG.COLS} × ${STICKER_CONFIG.CELL_WIDTH} = ${targetWidth}px, Total height = ${STICKER_CONFIG.ROWS} × ${STICKER_CONFIG.CELL_HEIGHT} = ${targetHeight}px
+- NO extra rows, NO extra columns, NO partial cells
+
+Content Requirements:
+1. Character: Based on the input image provided
 2. Theme: "${themeDescription}"
-3. Text: Include funny phrases related to the theme. 
-   - **IMPORTANT**: ALL TEXT MUST BE IN **TRADITIONAL CHINESE (繁體中文)**. Do NOT use Simplified Chinese or English.
-   - **VARIETY**: Use DIFFERENT phrases for each sticker. Be creative and diverse.
-4. Typography: 
-   - Style: "${fontDescription}"
-   - Color: Use vibrant, lively colors (e.g., bright orange, hot pink, cyan, red, purple). **ABSOLUTELY NO GREEN** or colors close to RGB(0, 255, 0) for text, as it will be removed by the green screen filter.
-   - Effects: **MUST add a 2-3px thick WHITE OUTLINE (stroke)** around all text to ensure readability on any background.
-   - Size: Large, legible, and integrated into the sticker design.
-5. Layout: Strictly arrange in a grid of ${STICKER_CONFIG.COLS} columns and ${STICKER_CONFIG.ROWS} rows.
-6. Background: Use a **pure green screen background (RGB 0, 255, 0)** for the entire canvas. This green will be removed later.
-7. Style: "${styleDescription}"
-8. Output: A single image containing all ${totalStickers} stickers in a ${STICKER_CONFIG.COLS}x${STICKER_CONFIG.ROWS} grid layout.
+3. Text Requirements (CRITICAL - NO DUPLICATES ALLOWED):
+   - Traditional Chinese (繁體中文) ONLY with 2-3px WHITE OUTLINE
+   - ⚠️ ABSOLUTELY NO DUPLICATE TEXT - Every single sticker MUST have UNIQUE, DIFFERENT text
+   - Check before finalizing: NO two stickers should have the same text
+   - Match text to expression/emotion naturally
+   - Use varied colloquial phrases (e.g., "好累喔", "太開心了", "不要啊", "加油", "睡覺去", "吃飯了")
+   - NO Simplified Chinese, NO English, NO random text
+4. Typography Style: "${fontDescription}"
+   - Colors: bright orange, hot pink, cyan, red, purple
+   - ABSOLUTELY NO GREEN (will be removed by chroma key)
+5. Art Style: "${styleDescription}"
+6. Background: Pure green (#00FF00) for entire canvas
+7. Each sticker: UNIQUE poses, expressions, and text
 
-IMPORTANT:
-- Each sticker should have UNIQUE and DISTINCT poses, expressions, and text.
-- Vary the composition, angles, and emotions across all ${totalStickers} stickers.
-- Text must be in Traditional Chinese with white outlines.
-- Background MUST be pure green (RGB 0, 255, 0).
-- NO green colors in the character or text.
-- Make each generation DIFFERENT from previous ones by using creative variations.
+Final Check Before Submission:
+1. Count: EXACTLY ${totalStickers} stickers in ${STICKER_CONFIG.COLS} columns × ${STICKER_CONFIG.ROWS} rows
+2. Text Uniqueness: Verify NO duplicate text - all ${totalStickers} text phrases must be different
+3. Grid Alignment: Perfect grid with equal spacing
         `;
 
         updateProgress(30);
@@ -1276,6 +1386,11 @@ IMPORTANT:
         img.onload = () => {
           const { COLS, ROWS, CELL_WIDTH, CELL_HEIGHT } = STICKER_CONFIG;
           const stickers = [];
+          
+          const cellWidth = img.width / COLS;
+          const cellHeight = img.height / ROWS;
+          
+          const margin = 0.02;
 
           for (let row = 0; row < ROWS; row++) {
             for (let col = 0; col < COLS; col++) {
@@ -1285,10 +1400,10 @@ IMPORTANT:
               canvas.width = CELL_WIDTH;
               canvas.height = CELL_HEIGHT;
 
-              const sx = (img.width / COLS) * col;
-              const sy = (img.height / ROWS) * row;
-              const sw = img.width / COLS;
-              const sh = img.height / ROWS;
+              const sx = cellWidth * col + (cellWidth * margin);
+              const sy = cellHeight * row + (cellHeight * margin);
+              const sw = cellWidth * (1 - margin * 2);
+              const sh = cellHeight * (1 - margin * 2);
 
               ctx.drawImage(img, sx, sy, sw, sh, 0, 0, CELL_WIDTH, CELL_HEIGHT);
               stickers.push(canvas.toDataURL('image/png'));
