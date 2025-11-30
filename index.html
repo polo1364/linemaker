@@ -719,7 +719,18 @@
             <input type="range" id="borderWidth" min="0" max="30" value="10">
           </div>
 
+          <div class="form-group">
+            <label>🔤 文字大小</label>
+            <select id="textSize">
+              <option value="small">小 (24-32px)</option>
+              <option value="medium" selected>中 (36-48px)</option>
+              <option value="large">大 (52-64px)</option>
+              <option value="xlarge">特大 (68-80px)</option>
+            </select>
+          </div>
+
           <button class="btn-secondary" onclick="showApiKeyModal()">🔑 設置API Key</button>
+          <button class="btn-secondary" onclick="showTutorialModal()">📚 如何申請API</button>
           <button class="btn-primary" id="generateBtn" onclick="handleGenerate()">
             ✨ 生成貼圖
           </button>
@@ -758,11 +769,11 @@
       </div>
     </div>
   </div>
-
   <!-- API Key Modal -->
   <div class="modal" id="apiKeyModal">
     <div class="modal-content">
-      <div class="modal-title">🔑 設置Gemini API Key</div>
+      <span class="close" onclick="closeApiKeyModal()">&times;</span>
+      <div class="modal-title">🔑 設置API Key</div>
       <div class="modal-desc">
         請輸入您的Google Gemini API Key。您可以在
         <a href="https://aistudio.google.com/apikey" target="_blank">Google AI Studio</a>
@@ -773,9 +784,22 @@
     </div>
   </div>
 
-  <canvas id="canvas" style="display: none;"></canvas>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Tutorial Modal -->
+  <div class="modal" id="tutorialModal">
+    <div class="modal-content" style="max-width: 1200px;">
+      <span class="close" onclick="closeTutorialModal()">&times;</span>
+      <div class="modal-title">📚 如何申請Google AI Studio API 金鑰</div>
+      <div class="modal-desc">
+        請按照以下步驟獲取免費API Key，然後貼到「設置API Key」中
+      </div>
+      <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663180163086/nXXhtooOlzUiOzyC.jpg" 
+           alt="API申請教學" 
+           style="width: 100%; border-radius: 12px; margin-top: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1);">
+      <div style="margin-top: 20px; padding: 15px; background: rgba(139, 92, 246, 0.1); border-radius: 8px; border-left: 4px solid var(--primary);">
+        <strong>⚠️ 重要提示：</strong> API 金鑰如同密碼，請勿洩露。建議透過後端伺服器呼叫API。
+      </div>
+    </div>
+  </div>c="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script>
     // Constants (擴充版本：60+主題、60+風格、40+字體，帶分類標籤)
 // 擴充的主題、風格、字體配置（約2倍數量，帶分類）
@@ -1132,6 +1156,14 @@ const FONT_STYLES = {
       document.getElementById('apiKeyInput').value = apiKey;
     }
 
+    function showTutorialModal() {
+      document.getElementById('tutorialModal').classList.add('show');
+    }
+
+    function closeTutorialModal() {
+      document.getElementById('tutorialModal').classList.remove('show');
+    }
+
     function saveApiKey() {
       apiKey = document.getElementById('apiKeyInput').value;
       if (apiKey) {
@@ -1164,6 +1196,7 @@ const FONT_STYLES = {
         const theme = document.getElementById('themeSelect').value;
         const style = document.getElementById('styleSelect').value;
         const font = document.getElementById('fontSelect').value;
+        const textSize = document.getElementById('textSize').value;
 
         const MODEL_NAME = "gemini-3-pro-image-preview";
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
@@ -1210,6 +1243,7 @@ Content Requirements:
 4. Typography Style: "${fontDescription}"
    - Colors: bright orange, hot pink, cyan, red, purple
    - ABSOLUTELY NO GREEN (will be removed by chroma key)
+   - Text Size: ${textSize === 'small' ? '24-32px (small, subtle text)' : textSize === 'medium' ? '36-48px (medium, balanced text)' : textSize === 'large' ? '52-64px (large, prominent text)' : '68-80px (extra large, bold text)'} - Make text ${textSize === 'small' ? 'smaller and more subtle' : textSize === 'medium' ? 'medium-sized and balanced' : textSize === 'large' ? 'large and eye-catching' : 'extra large and very bold'}
 5. Art Style: "${styleDescription}"
 6. Background: Pure green (#00FF00) for entire canvas
 7. Each sticker: UNIQUE poses, expressions, and text
@@ -1251,9 +1285,26 @@ Final Check Before Submission:
         });
 
         if (!response.ok) {
-          const errData = await response.json();
+          let errData;
+          try {
+            errData = await response.json();
+          } catch (e) {
+            errData = { error: { message: `HTTP ${response.status}: ${response.statusText}` } };
+          }
           console.error('API Error:', errData);
-          throw new Error(errData.error?.message || 'API請求失敗');
+          
+          let errorMsg = 'API請求失敗';
+          if (response.status === 500) {
+            errorMsg = 'Gemini API內部錯誤，可能原因：\n1. 提示詞過長或圖片過大\n2. API配額不足\n3. 模型暫時不可用\n\n請稍後再試或更換較小的網格（3x3）';
+          } else if (response.status === 429) {
+            errorMsg = 'API請求過於頻繁，請稍後再試';
+          } else if (response.status === 400) {
+            errorMsg = 'API請求參數錯誤：' + (errData.error?.message || '請檢查API Key是否正確');
+          } else {
+            errorMsg = errData.error?.message || errorMsg;
+          }
+          
+          throw new Error(errorMsg);
         }
 
         const data = await response.json();
@@ -1429,9 +1480,25 @@ Final Check Before Submission:
 
           canvas.width = img.width + borderWidth * 2;
           canvas.height = img.height + borderWidth * 2;
-
-          ctx.fillStyle = 'white';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          if (borderWidth > 0) {
+            for (let offsetY = -borderWidth; offsetY <= borderWidth; offsetY++) {
+              for (let offsetX = -borderWidth; offsetX <= borderWidth; offsetX++) {
+                const distance = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+                if (distance <= borderWidth) {
+                  ctx.globalAlpha = 1;
+                  ctx.drawImage(img, borderWidth + offsetX, borderWidth + offsetY);
+                }
+              }
+            }
+            
+            ctx.globalCompositeOperation = 'source-in';
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.globalCompositeOperation = 'source-over';
+          }
+          
           ctx.drawImage(img, borderWidth, borderWidth);
 
           resolve(canvas.toDataURL('image/png'));
