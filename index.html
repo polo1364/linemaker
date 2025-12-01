@@ -1080,7 +1080,28 @@ const FONT_STYLES = {
       });
 
       const fontSelect = document.getElementById('fontSelect');
+      // Use a curated subset of fonts that the AI can realistically depict.  Many of
+      // the more stylised or decorative fonts (e.g. neon, pixel, typewriter) tend
+      // to produce generic results.  Restricting choices improves the chance of
+      // the generated text matching the requested style.
+      // Restrict the font list further to only those styles that the
+      // generative model tends to reproduce reliably.  Generic base fonts
+      // often look too similar, so we only keep a few basic options and
+      // focus on handwritten, calligraphy and cute styles that produce
+      // distinctive lettering.  This helps ensure the generated text
+      // visibly matches the selected font style.
+      const ALLOWED_FONTS = [
+        // retain two base fonts for neutral options
+        '【基礎】黑體', '【基礎】明體',
+        // Handwritten styles – these have casual, personal strokes
+        '【手寫】手寫體', '【手寫】塗鴉字', '【手寫】簽名字', '【手寫】粉筆字',
+        // Calligraphy styles – dynamic brush strokes and flowing lines
+        '【書法】書法體', '【書法】行書', '【書法】篆書', '【書法】草書', '【書法】隸書',
+        // Cute styles – bubbly, rounded characters for kawaii appeal
+        '【可愛】棉花糖體', '【可愛】貓咪字', '【可愛】泡泡字'
+      ];
       Object.keys(FONT_STYLES).forEach(font => {
+        if (!ALLOWED_FONTS.includes(font)) return;
         const option = document.createElement('option');
         option.value = font;
         option.textContent = font;
@@ -1203,7 +1224,21 @@ const FONT_STYLES = {
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
 
         const base64Image = uploadedImage.split(',')[1];
-        const themeDescription = THEME_PROMPTS[theme];
+        // Build descriptions for theme, style and font.  Randomise the theme
+        // description to reduce repetition by shuffling and selecting a subset
+        // of the comma‑separated items (e.g. actions, emotions) in the prompt.
+        let themeDescription = THEME_PROMPTS[theme];
+        if (typeof themeDescription === 'string') {
+          try {
+            let items = themeDescription.split(/[,，]/).map(item => item.trim()).filter(Boolean);
+            items = items.sort(() => Math.random() - 0.5);
+            const minKeep = Math.min(4, items.length);
+            const keepCount = Math.max(minKeep, Math.floor(items.length * (0.6 + Math.random() * 0.4)));
+            themeDescription = items.slice(0, keepCount).join(', ');
+          } catch (e) {
+            console.warn('Theme randomisation failed:', e);
+          }
+        }
         const styleDescription = STYLE_PROMPTS[style];
         const fontDescription = FONT_STYLES[font];
 
@@ -1236,17 +1271,29 @@ Content Requirements:
 2. Theme: "${themeDescription}"
 3. Text Requirements (CRITICAL - NO DUPLICATES ALLOWED):
    - Traditional Chinese (繁體中文) ONLY with 2-3px WHITE OUTLINE
-   - ⚠️ ABSOLUTELY NO DUPLICATE TEXT – every sticker MUST have UNIQUE, DIFFERENT text
+   - ⚠️ ABSOLUTELY NO DUPLICATE TEXT - Every single sticker MUST have UNIQUE, DIFFERENT text
    - Check before finalizing: NO two stickers should have the same text
    - Match text to expression/emotion naturally
    - Use varied colloquial phrases (e.g., "好累喔", "太開心了", "不要啊", "加油", "睡覺去", "吃飯了")
    - NO Simplified Chinese, NO English, NO random text
-   - Avoid unnatural or illogical sentences; ensure each phrase is colloquial and contextually appropriate
-   - Use diverse sentence structures and synonyms to reduce repetition and enhance variety
 4. Typography Style: "${fontDescription}"
    - Colors: bright orange, hot pink, cyan, red, purple
    - ABSOLUTELY NO GREEN (will be removed by chroma key)
-   - Text Size: ${textSize === 'small' ? '24-32px (small, subtle text)' : textSize === 'medium' ? '36-48px (medium, balanced text)' : textSize === 'large' ? '52-64px (large, prominent text)' : '68-80px (extra large, bold text)'} - Make text ${textSize === 'small' ? 'smaller and more subtle' : textSize === 'medium' ? 'medium-sized and balanced' : textSize === 'large' ? 'large and eye-catching' : 'extra large and very bold'}
+   - Text Size: ${textSize === 'small'
+          ? '16–24px (small: around 5–15% of each sticker height; subtle caption‑like text that never dominates the sticker)'
+          : textSize === 'medium'
+          ? '28–36px (medium: about 15–25% of each sticker height; balanced and easily readable but not overpowering)'
+          : textSize === 'large'
+          ? '40–48px (large: around 30–40% of each sticker height; bold and eye‑catching yet leaving space for the character)'
+          : '52–60px (extra large: roughly 45–55% of each sticker height; extremely prominent and commanding attention)'} - Make text ${textSize === 'small'
+          ? 'extremely small and subtle; it should occupy only 5–15% of the sticker height and act as a caption'
+          : textSize === 'medium'
+          ? 'moderate and balanced; occupy 15–25% of the sticker height so it is clearly readable without taking over the scene'
+          : textSize === 'large'
+          ? 'bold and prominent; take up about one‑third of the sticker height while still leaving room for the character'
+          : 'dramatically large; it should fill nearly half of the sticker height and act as a dominant element'}
+
+   - Font authenticity: The typography must unmistakably reflect the selected style.  For calligraphy fonts, use brush‑like strokes with thick‑to‑thin variation and dynamic flow.  For handwritten fonts, simulate casual, personal handwriting with irregular lines.  For cute fonts, draw bubbly, rounded letters with kawaii charm.  Avoid generic or mismatched lettering that does not correspond to the chosen style.
 5. Art Style: "${styleDescription}"
 6. Background: Pure green (#00FF00) for entire canvas
 7. Each sticker: UNIQUE poses, expressions, and text
@@ -1279,9 +1326,10 @@ Final Check Before Submission:
               imageConfig: {
                 imageSize: "2K"
               },
-              temperature: 1.0,
-              topK: 40,
-              topP: 0.95,
+              // Increase diversity of outputs to reduce repetitive text and poses
+              temperature: 1.1,
+              topK: 80,
+              topP: 0.90,
               seed: randomSeed
             }
           })
